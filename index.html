@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Tree</title>
+</head>
+
+<body>
+  <canvas id="gameCanvas" width="640" height="480" style="display: block;
+    margin: 0 auto; border:1px solid #000000"></canvas>
+
+
+  <script>
+    let WIDTH = 640;
+    let HEIGHT = 480;
+    let GROUND = 64;
+    let RADIUS = 4;
+    let MIN_START_ANGLE = -Math.PI * 0.25;
+    let MAX_START_ANGLE = Math.PI * 0.25;
+    let ROOTS = 1;
+
+    const rand = (min, max) => Math.random() * (max - min) + min
+    const circle = (x, y, r) => {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    const map = (x, in_min, in_max, out_min, out_max) => {
+      return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    }
+    const createRoot = (x, y, r, a) => {
+      if (r <= 0) return;
+
+      circle(x, y, r);
+
+      x += Math.cos(a + Math.PI * 0.5);
+      y += Math.sin(a + Math.PI * 0.5);
+      r -= rand(0.005, 0.015);
+      a += rand(-0.2, 0.2);
+
+      setTimeout(createRoot, 1, x, y, r, a);
+      if (Math.random() < map(-r, -RADIUS, 0, 0.005, 0.02)) {
+        setTimeout(createRoot, 1, x, y, r, a);
+      }
+    }
+
+    let ctx = document.getElementById("gameCanvas").getContext("2d");// as CanvasRenderingContext2D;
+
+    function generate() {
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, GROUND, WIDTH, HEIGHT - GROUND);
+
+      ctx.fillStyle = "white";
+      if (ROOTS === 1) {
+        createRoot(WIDTH / 2, GROUND, RADIUS, 0);
+      }
+      else {
+        for (let i = 0; i < ROOTS; i++) {
+          createRoot(WIDTH / 2, GROUND, RADIUS, MIN_START_ANGLE + (MAX_START_ANGLE - MIN_START_ANGLE) * (i / (ROOTS - 1)));
+        }
+      }
+    }
+
+    ctx.translate(0, HEIGHT);
+    ctx.scale(1, -1);
+    generate();
+  </script>
+</body>
+
+</html>
